@@ -43,7 +43,7 @@ export class FilmsService {
 
     const items: ScheduleDto[] = schedule.map((session) => ({
       ...session,
-      hall: String(session.hall),
+      hall: Number(session.hall),
     }));
 
     return {
