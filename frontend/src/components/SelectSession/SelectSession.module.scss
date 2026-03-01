@@ -2,7 +2,7 @@
 @use 'mixins';
 
 .schedule {
-  @include mixins.flex(row);
+  @include mixins.flex(column);
   gap: $defaultPadding;
 
   .places {
@@ -22,21 +22,14 @@
     padding: 0.5rem 0;
   }
 
-  .day,
-  .row {
-    gap: 2rem;
-    text-align: center;
-  }
-
-  .day {
-    @include mixins.flex(column);
-  }
-
-  .row {
+  .days,
+  .times {
     @include mixins.flex(row);
-    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
   }
 
+  .dayButton,
   .time,
   .place {
     border: none;

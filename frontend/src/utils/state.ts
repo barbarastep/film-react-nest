@@ -43,7 +43,10 @@ export const initialState: AppState = {
 
 const addTicket = (state: AppState, key: string): AppState => {
     const [row, seat] = key.split(':').map(Number);
-    const isExists = state.basket.some(ticket => ticket.row === row && ticket.seat === seat);
+    const currentSessionId = state.selectedSession;
+    const isExists = state.basket.some((ticket) =>
+        ticket.session === currentSessionId && ticket.row === row && ticket.seat === seat
+    );
     const session = state.schedule.find(session => session.id === state.selectedSession);
     if (session) {
         if (!isExists) {
@@ -64,7 +67,9 @@ const addTicket = (state: AppState, key: string): AppState => {
         } else {
             return {
                 ...state,
-                basket: state.basket.filter(ticket => ticket.row !== row || ticket.seat !== seat)
+                basket: state.basket.filter((ticket) =>
+                    ticket.session !== currentSessionId || ticket.row !== row || ticket.seat !== seat
+                )
             };
         }
     }
@@ -73,10 +78,25 @@ const addTicket = (state: AppState, key: string): AppState => {
 }
 
 const removeTicket = (state: AppState, key: string): AppState => {
-    const [row, seat] = key.split(':').map(Number);
+    const parts = key.split(':');
+    if (parts.length === 3) {
+        const [sessionId, rowValue, seatValue] = parts;
+        const row = Number(rowValue);
+        const seat = Number(seatValue);
+        return {
+            ...state,
+            basket: state.basket.filter((ticket) =>
+                ticket.session !== sessionId || ticket.row !== row || ticket.seat !== seat
+            )
+        };
+    }
+
+    const [row, seat] = parts.map(Number);
     return {
         ...state,
-        basket: state.basket.filter(ticket => ticket.row !== row || ticket.seat !== seat)
+        basket: state.basket.filter((ticket) =>
+            ticket.session !== state.selectedSession || ticket.row !== row || ticket.seat !== seat
+        )
     };
 }
 
