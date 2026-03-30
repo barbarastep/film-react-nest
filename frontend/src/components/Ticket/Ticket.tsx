@@ -2,6 +2,7 @@ import styles from './Ticket.module.scss';
 import clsx from "clsx";
 
 export type TicketProps = {
+    film: string;
     place: string;
     session: string;
     price: string;
@@ -9,10 +10,11 @@ export type TicketProps = {
     className?: string;
 };
 
-export function Ticket({ place, session, price, className, onDelete}: TicketProps) {
+export function Ticket({ film, place, session, price, className, onDelete}: TicketProps) {
     return (
         <div className={clsx(styles.ticket, className)}>
             <div className={styles.info}>
+                <span className={styles.film}>{film}</span>
                 <strong className={styles.place}>{place}</strong>
                 <span className={styles.session}>{session}</span>
             </div>

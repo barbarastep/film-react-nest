@@ -1,6 +1,6 @@
+import { useEffect, useMemo, useState } from 'react';
 import styles from './SelectSession.module.scss';
 import clsx from "clsx";
-import {useEffect, useMemo, useState} from "react";
 
 export type ScheduleSession = {
     id: string;
@@ -37,71 +37,69 @@ function dayTimeKey(day: string, time: string) {
 export function SelectSession({ sessions, selected = null, onSelect }: SelectSessionProps) {
     const data = useMemo(() => groupSessions(sessions), [sessions]);
     const days = useMemo(() => Object.keys(data), [data]);
-    const selectedDayBySession = useMemo(() => {
-        if (!selected) return null;
-        const session = sessions.find((item) => item.id === selected);
-        return session?.day ?? null;
-    }, [selected, sessions]);
-    const [activeDay, setActiveDay] = useState<string>('');
+    const selectedSession = sessions.find((session) => session.id === selected) ?? null;
+    const [selectedDay, setSelectedDay] = useState<string | null>(selectedSession?.day ?? days[0] ?? null);
 
     useEffect(() => {
-        if (days.length === 0) {
-            setActiveDay('');
+        if (!selectedDay || !days.includes(selectedDay)) {
+            setSelectedDay(selectedSession?.day ?? days[0] ?? null);
+        }
+    }, [days, selectedDay, selectedSession]);
+
+    const handleSelectDay = (day: string) => {
+        setSelectedDay(day);
+
+        if (selectedSession?.day === day) {
             return;
         }
 
-        setActiveDay((currentDay) => {
-            // Keep user's day choice while it exists in current schedule
-            if (currentDay && data[currentDay]) {
-                return currentDay;
-            }
-
-            if (selectedDayBySession && data[selectedDayBySession]) {
-                return selectedDayBySession;
-            }
-
-            return days[0];
-        });
-    }, [data, days, selectedDayBySession]);
-
-    const sessionsByDay = activeDay ? data[activeDay] : null;
-
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const target = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement;
-        const id = String(target.dataset.id);
-        const time = String(target.dataset.time);
-        if (id && time) {
-            onSelect(id);
+        const firstTime = Object.keys(data[day] ?? {})[0];
+        if (!firstTime) {
+            return;
         }
-    }
+
+        onSelect(data[day][firstTime].id);
+    };
+
+    useEffect(() => {
+        if (!selectedSession?.day || selectedSession.day === selectedDay) {
+            return;
+        }
+
+        if (!selectedDay || !days.includes(selectedDay)) {
+            setSelectedDay(days[0] ?? null);
+        }
+    }, [days, selectedDay, selectedSession]);
+
+    const visibleSessions = selectedDay ? Object.keys(data[selectedDay] ?? {}) : [];
 
     return (
-        <form className={styles.schedule} name="schedule" onSubmit={handleSubmit}>
+        <div className={styles.schedule}>
             <div className={styles.days}>
                 {days.map((day) => <button
                     key={day}
                     type="button"
                     className={clsx(styles.dayButton, {
-                        [styles.place_active]: day === activeDay
+                        [styles.dayButton_active]: selectedDay === day,
                     })}
-                    onClick={() => setActiveDay(day)}
+                    onClick={() => handleSelectDay(day)}
                 >
                     {day}
                 </button>)}
             </div>
+
             <div className={styles.times}>
-                {sessionsByDay && Object.keys(sessionsByDay).map(time => <button
-                    key={dayTimeKey(activeDay, time)}
+                {visibleSessions.map((time) => <button
+                    key={dayTimeKey(selectedDay ?? '', time)}
+                    type="button"
                     className={clsx(styles.time, {
-                        [styles.place_active]: selected === sessionsByDay[time].id
+                        [styles.time_active]: selected === data[selectedDay!][time].id
                     })}
-                    data-id={sessionsByDay[time].id}
-                    data-time={time}
+                    onClick={() => onSelect(data[selectedDay!][time].id)}
                 >
                     {time}
                 </button>)}
             </div>
-        </form>
+        </div>
     );
 }

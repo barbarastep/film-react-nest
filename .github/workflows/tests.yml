@@ -25,6 +25,25 @@ jobs:
       run: bash $DIR_TESTS/bin/backend.sh
   test_endpoints:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_DRIVER: postgres
+      DATABASE_URL: postgres://prac:prac@localhost:5432/prac
+      DATABASE_USERNAME: prac
+      DATABASE_PASSWORD: prac
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: prac
+          POSTGRES_PASSWORD: prac
+          POSTGRES_DB: prac
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U prac -d prac"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
     - name: Set up GitHub Actions
       uses: actions/checkout@v4
@@ -34,7 +53,37 @@ jobs:
         node-version: 18.x
     - name: Get testing lib
       run: set -eu && git clone --depth 1 $REP_TESTS $DIR_TESTS
-    - name: Start project
-      run: bash $DIR_TESTS/bin/start_project.sh
+    - name: Install PostgreSQL client
+      run: sudo apt-get update && sudo apt-get install -y postgresql-client
+    - name: Init test database
+      env:
+        PGPASSWORD: prac
+      run: |
+        until pg_isready -h localhost -p 5432 -U prac -d prac; do
+          sleep 1
+        done
+        psql -h localhost -U prac -d prac -f backend/test/prac.init.sql
+        psql -h localhost -U prac -d prac -f backend/test/prac.films.sql
+        psql -h localhost -U prac -d prac -f backend/test/prac.shedules.sql
+    - name: Install backend dependencies
+      working-directory: backend
+      run: npm ci
+    - name: Start backend
+      working-directory: backend
+      env:
+        DATABASE_DRIVER: postgres
+        DATABASE_URL: postgres://prac:prac@localhost:5432/prac
+        DATABASE_USERNAME: prac
+        DATABASE_PASSWORD: prac
+      run: |
+        nohup npm run start > /tmp/backend.log 2>&1 &
+        for i in {1..60}; do
+          if curl -sf http://localhost:3000/api/afisha/films > /dev/null; then
+            exit 0
+          fi
+          sleep 2
+        done
+        cat /tmp/backend.log
+        exit 1
     - name: Run tests
       run: bash $DIR_TESTS/bin/endpoints.sh

@@ -1,54 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-
-import {
-  FilmDto,
-  FilmsListDto,
-  FilmScheduleDto,
-  ScheduleDto,
-} from './dto/films.dto';
-import { RepositoryService } from '../repository/repository.service';
+import { Injectable } from '@nestjs/common';
+import { FilmsRepository } from '../repository/films.repository';
 
 @Injectable()
 export class FilmsService {
-  constructor(private readonly repositoryService: RepositoryService) {}
+  constructor(private readonly repository: FilmsRepository) {}
 
-  async getFilms(): Promise<FilmsListDto> {
-    const films = await this.repositoryService.getFilms();
-    const items = films.map(
-      (film): FilmDto => ({
-        id: film.id,
-        rating: film.rating,
-        director: film.director,
-        tags: film.tags,
-        title: film.title,
-        about: film.about,
-        description: film.description,
-        image: film.image,
-        cover: film.cover,
-      }),
-    );
-
-    return {
-      total: items.length,
-      items,
-    };
+  getFilms() {
+    return this.repository.getFilms();
   }
 
-  async getFilmSchedule(id: string): Promise<FilmScheduleDto> {
-    const schedule = await this.repositoryService.getSchedule(id);
-
-    if (!schedule) {
-      throw new NotFoundException({ error: 'Film not found' });
-    }
-
-    const items: ScheduleDto[] = schedule.map((session) => ({
-      ...session,
-      hall: Number(session.hall),
-    }));
-
-    return {
-      total: items.length,
-      items,
-    };
+  getFilmSchedule(id: string) {
+    return this.repository.getFilmSchedule(id);
   }
 }

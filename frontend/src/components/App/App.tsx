@@ -15,9 +15,6 @@ import {useAppState} from "../../hooks/useAppState.tsx";
 
 function App() {
     const { state, data, handlers } = useAppState();
-    const basketDescription = state.basket.length === 1
-        ? '1 билет'
-        : `${state.basket.length} билетов`;
 
     return (<>
         <Layout isLocked={!!state.modal}>
@@ -37,29 +34,29 @@ function App() {
             header={
                 (state.modal === 'schedule')
                     ? <FilmInfo {...data.preview} description={data.preview.about} isCompact={true} />
-                    : (state.modal === 'places')
-                    ? <ModalHeader
-                        title={data.preview.title}
-                        description={data.preview.about}
-                        onClick={handlers.go('prev')}
-                    />
                     : (state.modal === 'basket')
-                    ? <ModalHeader
-                        title={'Корзина'}
-                        description={basketDescription}
-                        onClick={handlers.go('prev')}
-                    />
-                    : (state.modal === 'contacts')
-                    ? <ModalHeader
-                        title={'Контакты для заказа'}
-                        description={basketDescription}
-                        onClick={handlers.go('prev')}
-                    />
-                    : <ModalHeader
-                        title={'Заказ оформлен'}
-                        description={'Билеты уже у вас на почте'}
-                        onClick={handlers.go('prev')}
-                    />
+                        ? <ModalHeader
+                            title={'Корзина'}
+                            description={'Проверьте выбранные билеты перед оформлением заказа'}
+                            onClick={handlers.go('prev')}
+                        />
+                        : (state.modal === 'contacts')
+                            ? <ModalHeader
+                                title={'Контактные данные'}
+                                description={'Укажите почту и телефон для получения билетов'}
+                                onClick={handlers.go('prev')}
+                            />
+                            : (state.modal === 'success')
+                                ? <ModalHeader
+                                    title={'Заказ оформлен'}
+                                    description={'Подтверждение и билеты уже отправлены на вашу почту'}
+                                    onClick={handlers.go('prev')}
+                                />
+                        : <ModalHeader
+                            title={data.preview.title}
+                            description={data.preview.about}
+                            onClick={handlers.go('prev')}
+                        />
             }
             actions={handlers.getAction()}
         >
@@ -72,7 +69,7 @@ function App() {
             {(state.modal === 'places' && data.session) && <SelectPlaces
                 hall={{ rows: data.session.rows, seats: data.session.seats }}
                 taken={data.session.taken}
-                selected={state.basket.filter((ticket) => ticket.session === state.selectedSession)}
+                selected={data.selectedPlaces}
                 onSelect={handlers.selectPlace}
             />}
 

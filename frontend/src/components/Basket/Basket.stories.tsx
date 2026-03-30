@@ -21,18 +21,21 @@ export const Default: Story = {
     items: [
       {
         id: '1',
+        film: 'Недостижимая утопия',
         place: 'A1',
         session: '10:00',
         price: '1000 ₽',
       },
       {
         id: '2',
+        film: 'Парадокс Нексуса',
         place: 'A2',
         session: '10:00',
         price: '1000 ₽',
       },
       {
         id: '3',
+        film: 'Стражи Гримуара',
         place: 'A3',
         session: '10:00',
         price: '1000 ₽',

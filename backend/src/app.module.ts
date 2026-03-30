@@ -3,8 +3,13 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigModule } from '@nestjs/config';
 import * as path from 'node:path';
 
-import { FilmsModule } from './films/films.module';
-import { OrderModule } from './order/order.module';
+import { DatabaseModule } from './database/database.module';
+import { FilmsController } from './films/films.controller';
+import { OrderController } from './order/order.controller';
+import { FilmsService } from './films/films.service';
+import { OrderService } from './order/order.service';
+import { AppRepository } from './repository/app.repository';
+import { FilmsRepository } from './repository/films.repository';
 
 @Module({
   imports: [
@@ -12,13 +17,20 @@ import { OrderModule } from './order/order.module';
       isGlobal: true,
       cache: true,
     }),
+    DatabaseModule,
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, '..', 'public'),
     }),
-    FilmsModule,
-    OrderModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [FilmsController, OrderController],
+  providers: [
+    AppRepository,
+    {
+      provide: FilmsRepository,
+      useExisting: AppRepository,
+    },
+    FilmsService,
+    OrderService,
+  ],
 })
 export class AppModule {}
