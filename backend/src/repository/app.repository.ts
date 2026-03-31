@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { CreateOrderDto, OrderResultDto } from '../order/dto/order.dto';
@@ -14,6 +10,12 @@ import {
 import { FilmEntity } from '../entities/film.entity';
 import { ScheduleEntity } from '../entities/schedule.entity';
 import { FilmsRepository } from './films.repository';
+import {
+  DuplicateSeatInOrderError,
+  FilmNotFoundError,
+  SeatAlreadyTakenError,
+  SessionNotFoundError,
+} from './repository.errors';
 
 @Injectable()
 export class AppRepository implements FilmsRepository {
@@ -42,7 +44,7 @@ export class AppRepository implements FilmsRepository {
     });
 
     if (!film) {
-      throw new NotFoundException(`Film with id "${id}" not found`);
+      throw new FilmNotFoundError(id);
     }
 
     const schedule = await this.scheduleRepository.find({
@@ -59,10 +61,6 @@ export class AppRepository implements FilmsRepository {
   async createOrder(
     order: CreateOrderDto,
   ): Promise<ListResponseDto<OrderResultDto>> {
-    if (!order.tickets.length) {
-      throw new BadRequestException('Order must contain at least one ticket');
-    }
-
     return this.dataSource.transaction(async (manager) => {
       const filmRepository = manager.getRepository(FilmEntity);
       const scheduleRepository = manager.getRepository(ScheduleEntity);
@@ -75,9 +73,7 @@ export class AppRepository implements FilmsRepository {
         });
 
         if (!film) {
-          throw new NotFoundException(
-            `Film with id "${ticket.film}" not found`,
-          );
+          throw new FilmNotFoundError(ticket.film);
         }
 
         const session = await scheduleRepository
@@ -88,23 +84,19 @@ export class AppRepository implements FilmsRepository {
           .getOne();
 
         if (!session) {
-          throw new NotFoundException(
-            `Session with id "${ticket.session}" not found`,
-          );
+          throw new SessionNotFoundError(ticket.session);
         }
 
         const seatKey = this.getSeatKey(ticket.row, ticket.seat);
         const taken = this.normalizeList(session.taken);
 
         if (taken.includes(seatKey)) {
-          throw new BadRequestException(`Seat ${seatKey} is already taken`);
+          throw new SeatAlreadyTakenError(seatKey);
         }
 
         const reservationKey = `${ticket.session}:${seatKey}`;
         if (reservedSeats.has(reservationKey)) {
-          throw new BadRequestException(
-            `Seat ${seatKey} is duplicated in request`,
-          );
+          throw new DuplicateSeatInOrderError(seatKey);
         }
 
         reservedSeats.add(reservationKey);
@@ -115,9 +107,7 @@ export class AppRepository implements FilmsRepository {
         const session = lockedSessions.get(ticket.session);
 
         if (!session) {
-          throw new NotFoundException(
-            `Session with id "${ticket.session}" not found`,
-          );
+          throw new SessionNotFoundError(ticket.session);
         }
 
         const seatKey = this.getSeatKey(ticket.row, ticket.seat);

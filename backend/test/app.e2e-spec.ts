@@ -121,4 +121,32 @@ describe('Afisha API (e2e)', () => {
         expect(body.items[0].seat).toBe(seat);
       });
   });
+
+  it('GET /api/afisha/films/:id/schedule returns 422 for an invalid uuid', () => {
+    return request(app.getHttpServer())
+      .get('/api/afisha/films/test/schedule')
+      .expect(422);
+  });
+
+  it('POST /api/afisha/order returns 422 for an invalid ticket uuid', () => {
+    return request(app.getHttpServer())
+      .post('/api/afisha/order')
+      .send({
+        email: 'test@example.com',
+        phone: '+79999999999',
+        tickets: [
+          {
+            film: 'test',
+            session: 'test',
+            daytime: '2026-03-31T10:00:00.000Z',
+            day: '31 марта',
+            time: '10:00',
+            row: 1,
+            seat: 1,
+            price: 350,
+          },
+        ],
+      })
+      .expect(422);
+  });
 });

@@ -35,7 +35,6 @@ import { ScheduleEntity } from '../entities/schedule.entity';
         };
       },
     }),
-    TypeOrmModule.forFeature([FilmEntity, ScheduleEntity]),
   ],
   exports: [TypeOrmModule],
 })
