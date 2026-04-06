@@ -1,0 +1,85 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: prac
+      POSTGRES_PASSWORD: prac
+      POSTGRES_DB: prac
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - '8080:80'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: runner
+    image: ghcr.io/barbarastep/film-backend:latest
+    environment:
+      DATABASE_DRIVER: postgres
+      DATABASE_URL: postgres://prac:prac@postgres:5432/prac
+      DATABASE_USERNAME: prac
+      DATABASE_PASSWORD: prac
+      LOGGER_TYPE: tskv
+      PORT: 3000
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: builder
+    image: ghcr.io/barbarastep/film-frontend:latest
+    volumes:
+      - frontend_dist:/dist
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    command: ["sh", "-c", "cp -r /app/dist/. /dist && tail -f /dev/null"]
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: ghcr.io/barbarastep/film-nginx:latest
+    ports:
+      - '80:80'
+    volumes:
+      - frontend_dist:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  frontend_dist:
+  postgres_data:
+  pgadmin_data:
