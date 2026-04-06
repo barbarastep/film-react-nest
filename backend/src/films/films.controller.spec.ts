@@ -34,7 +34,19 @@ describe('FilmsController', () => {
     it('should return films from service', async () => {
       const mockFilms = {
         total: 1,
-        items: [{ id: '1', rating: 8.0, director: 'Director', tags: [], title: 'Film 1', about: '', description: '', image: '', cover: '' }]
+        items: [
+          {
+            id: '1',
+            rating: 8.0,
+            director: 'Director',
+            tags: [],
+            title: 'Film 1',
+            about: '',
+            description: '',
+            image: '',
+            cover: '',
+          },
+        ],
       };
       service.getFilms.mockResolvedValue(mockFilms);
 
@@ -49,13 +61,27 @@ describe('FilmsController', () => {
     it('should return film schedule from service', async () => {
       const mockSchedule = {
         total: 1,
-        items: [{ id: '1', daytime: '2023-01-01T10:00:00', hall: 1, rows: 10, seats: 20, price: 100, taken: [] }]
+        items: [
+          {
+            id: '1',
+            daytime: '2023-01-01T10:00:00',
+            hall: 1,
+            rows: 10,
+            seats: 20,
+            price: 100,
+            taken: [],
+          },
+        ],
       };
       service.getFilmSchedule.mockResolvedValue(mockSchedule);
 
-      const result = await controller.getFilmSchedule('123e4567-e89b-12d3-a456-426614174000');
+      const result = await controller.getFilmSchedule(
+        '123e4567-e89b-12d3-a456-426614174000',
+      );
 
-      expect(service.getFilmSchedule).toHaveBeenCalledWith('123e4567-e89b-12d3-a456-426614174000');
+      expect(service.getFilmSchedule).toHaveBeenCalledWith(
+        '123e4567-e89b-12d3-a456-426614174000',
+      );
       expect(result).toEqual(mockSchedule);
     });
   });

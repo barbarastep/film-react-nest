@@ -6,7 +6,7 @@ export class TskvLogger implements LoggerService {
     const fields = [
       `level=${level}`,
       `message=${JSON.stringify(message)}`,
-      `optionalParams=${JSON.stringify(optionalParams)}`
+      `optionalParams=${JSON.stringify(optionalParams)}`,
     ];
     return fields.join('\t');
   }

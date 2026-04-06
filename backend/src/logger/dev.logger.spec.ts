@@ -1,20 +1,15 @@
 import { DevLogger } from './dev.logger';
+import { ConsoleLogger } from '@nestjs/common';
 
 describe('DevLogger', () => {
   let logger: DevLogger;
-  let consoleLogSpy: jest.SpyInstance;
 
   beforeEach(() => {
     logger = new DevLogger();
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-  });
-
-  afterEach(() => {
-    consoleLogSpy.mockRestore();
   });
 
   it('should be instance of ConsoleLogger', () => {
-    expect(logger).toBeInstanceOf(require('@nestjs/common').ConsoleLogger);
+    expect(logger).toBeInstanceOf(ConsoleLogger);
   });
 
   it('should have log method', () => {

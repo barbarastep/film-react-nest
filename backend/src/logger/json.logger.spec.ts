@@ -24,12 +24,17 @@ describe('JsonLogger', () => {
 
   describe('formatMessage', () => {
     it('should format message correctly', () => {
-      const result = logger['formatMessage']('log', 'test message', 'param1', 'param2');
+      const result = logger['formatMessage'](
+        'log',
+        'test message',
+        'param1',
+        'param2',
+      );
       const parsed = JSON.parse(result);
       expect(parsed).toEqual({
         level: 'log',
         message: 'test message',
-        optionalParams: ['param1', 'param2']
+        optionalParams: ['param1', 'param2'],
       });
     });
   });
@@ -38,7 +43,11 @@ describe('JsonLogger', () => {
     it('should call console.log with formatted message', () => {
       logger.log('test message', 'param1');
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        JSON.stringify({ level: 'log', message: 'test message', optionalParams: ['param1'] })
+        JSON.stringify({
+          level: 'log',
+          message: 'test message',
+          optionalParams: ['param1'],
+        }),
       );
     });
   });
@@ -47,7 +56,11 @@ describe('JsonLogger', () => {
     it('should call console.error with formatted message', () => {
       logger.error('error message', 'param1');
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        JSON.stringify({ level: 'error', message: 'error message', optionalParams: ['param1'] })
+        JSON.stringify({
+          level: 'error',
+          message: 'error message',
+          optionalParams: ['param1'],
+        }),
       );
     });
   });
@@ -56,7 +69,11 @@ describe('JsonLogger', () => {
     it('should call console.warn with formatted message', () => {
       logger.warn('warn message', 'param1');
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        JSON.stringify({ level: 'warn', message: 'warn message', optionalParams: ['param1'] })
+        JSON.stringify({
+          level: 'warn',
+          message: 'warn message',
+          optionalParams: ['param1'],
+        }),
       );
     });
   });
@@ -66,7 +83,11 @@ describe('JsonLogger', () => {
       if (logger.debug) {
         logger.debug('debug message', 'param1');
         expect(consoleDebugSpy).toHaveBeenCalledWith(
-          JSON.stringify({ level: 'debug', message: 'debug message', optionalParams: ['param1'] })
+          JSON.stringify({
+            level: 'debug',
+            message: 'debug message',
+            optionalParams: ['param1'],
+          }),
         );
       }
     });
@@ -77,7 +98,11 @@ describe('JsonLogger', () => {
       if (logger.verbose) {
         logger.verbose('verbose message', 'param1');
         expect(consoleLogSpy).toHaveBeenCalledWith(
-          JSON.stringify({ level: 'verbose', message: 'verbose message', optionalParams: ['param1'] })
+          JSON.stringify({
+            level: 'verbose',
+            message: 'verbose message',
+            optionalParams: ['param1'],
+          }),
         );
       }
     });

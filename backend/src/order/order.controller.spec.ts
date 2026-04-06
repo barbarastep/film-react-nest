@@ -91,7 +91,9 @@ describe('OrderController', () => {
       };
       service.createOrder.mockRejectedValue(new Error('Service error'));
 
-      await expect(controller.createOrder(mockOrder)).rejects.toThrow('Service error');
+      await expect(controller.createOrder(mockOrder)).rejects.toThrow(
+        'Service error',
+      );
     });
   });
 });

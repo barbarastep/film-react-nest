@@ -24,29 +24,42 @@ describe('TskvLogger', () => {
 
   describe('formatMessage', () => {
     it('should format message correctly', () => {
-      const result = logger['formatMessage']('log', 'test message', 'param1', 'param2');
-      expect(result).toBe('level=log\tmessage="test message"\toptionalParams=["param1","param2"]');
+      const result = logger['formatMessage'](
+        'log',
+        'test message',
+        'param1',
+        'param2',
+      );
+      expect(result).toBe(
+        'level=log\tmessage="test message"\toptionalParams=["param1","param2"]',
+      );
     });
   });
 
   describe('log', () => {
     it('should call console.log with formatted message', () => {
       logger.log('test message', 'param1');
-      expect(consoleLogSpy).toHaveBeenCalledWith('level=log\tmessage="test message"\toptionalParams=["param1"]');
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        'level=log\tmessage="test message"\toptionalParams=["param1"]',
+      );
     });
   });
 
   describe('error', () => {
     it('should call console.error with formatted message', () => {
       logger.error('error message', 'param1');
-      expect(consoleErrorSpy).toHaveBeenCalledWith('level=error\tmessage="error message"\toptionalParams=["param1"]');
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'level=error\tmessage="error message"\toptionalParams=["param1"]',
+      );
     });
   });
 
   describe('warn', () => {
     it('should call console.warn with formatted message', () => {
       logger.warn('warn message', 'param1');
-      expect(consoleWarnSpy).toHaveBeenCalledWith('level=warn\tmessage="warn message"\toptionalParams=["param1"]');
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'level=warn\tmessage="warn message"\toptionalParams=["param1"]',
+      );
     });
   });
 
@@ -54,7 +67,9 @@ describe('TskvLogger', () => {
     it('should call console.debug with formatted message', () => {
       if (logger.debug) {
         logger.debug('debug message', 'param1');
-        expect(consoleDebugSpy).toHaveBeenCalledWith('level=debug\tmessage="debug message"\toptionalParams=["param1"]');
+        expect(consoleDebugSpy).toHaveBeenCalledWith(
+          'level=debug\tmessage="debug message"\toptionalParams=["param1"]',
+        );
       }
     });
   });
@@ -63,7 +78,9 @@ describe('TskvLogger', () => {
     it('should call console.log with formatted message', () => {
       if (logger.verbose) {
         logger.verbose('verbose message', 'param1');
-        expect(consoleLogSpy).toHaveBeenCalledWith('level=verbose\tmessage="verbose message"\toptionalParams=["param1"]');
+        expect(consoleLogSpy).toHaveBeenCalledWith(
+          'level=verbose\tmessage="verbose message"\toptionalParams=["param1"]',
+        );
       }
     });
   });
