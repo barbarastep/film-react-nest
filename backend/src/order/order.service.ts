@@ -1,118 +1,82 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
-
-import { RepositoryService } from '../repository/repository.service';
+import { CreateOrderDto } from './dto/order.dto';
+import { FilmsRepository } from '../repository/films.repository';
 import {
-  CreateOrderDto,
-  OrderResultDto,
-  OrderedTicketDto,
-} from './dto/order.dto';
+  DuplicateSeatInOrderError,
+  FilmNotFoundError,
+  SeatAlreadyTakenError,
+  SessionNotFoundError,
+} from '../repository/repository.errors';
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly repositoryService: RepositoryService) {}
+  constructor(private readonly repository: FilmsRepository) {}
 
-  async createOrder(order: CreateOrderDto): Promise<OrderResultDto> {
-    this.validateOrderBody(order);
+  createOrder(order: CreateOrderDto) {
+    this.validateOrder(order);
 
-    const bookingSet = new Set<string>();
-    const resolvedTickets: OrderedTicketDto[] = [];
-
-    for (const ticket of order.tickets) {
-      const session = await this.repositoryService.getSession(
-        ticket.film,
-        ticket.session,
-      );
-
-      if (!session) {
-        throw new NotFoundException({ error: 'Film session not found' });
+    return this.repository.createOrder(order).catch((error: unknown) => {
+      if (error instanceof FilmNotFoundError) {
+        throw new NotFoundException(error.message);
       }
 
-      if (
-        !Number.isInteger(ticket.row) ||
-        !Number.isInteger(ticket.seat) ||
-        ticket.row < 1 ||
-        ticket.seat < 1
-      ) {
-        throw new BadRequestException({ error: 'Invalid row/seat value' });
+      if (error instanceof SessionNotFoundError) {
+        throw new NotFoundException(error.message);
       }
 
-      if (ticket.row > session.rows || ticket.seat > session.seats) {
-        throw new BadRequestException({ error: 'Seat is out of hall bounds' });
+      if (error instanceof SeatAlreadyTakenError) {
+        throw new ConflictException(error.message);
       }
 
-      const seatKey = `${ticket.row}:${ticket.seat}`;
-      const bookingKey = `${ticket.film}:${ticket.session}:${seatKey}`;
-
-      if (bookingSet.has(bookingKey)) {
-        throw new BadRequestException({
-          error: 'Duplicate seats in one order are not allowed',
-        });
+      if (error instanceof DuplicateSeatInOrderError) {
+        throw new BadRequestException(error.message);
       }
 
-      if (session.taken.includes(seatKey)) {
-        throw new BadRequestException({ error: 'Seat already taken' });
-      }
-
-      bookingSet.add(bookingKey);
-      resolvedTickets.push({
-        id: randomUUID(),
-        film: ticket.film,
-        session: ticket.session,
-        daytime: session.daytime,
-        row: ticket.row,
-        seat: ticket.seat,
-        price: session.price,
-      });
-    }
-
-    const reservedSeats: Array<{
-      filmId: string;
-      sessionId: string;
-      seatKey: string;
-    }> = [];
-    for (const ticket of resolvedTickets) {
-      const seatKey = `${ticket.row}:${ticket.seat}`;
-      const reserved = await this.repositoryService.addTakenSeat(
-        ticket.film,
-        ticket.session,
-        seatKey,
-      );
-      if (!reserved) {
-        for (const reservedSeat of reservedSeats) {
-          await this.repositoryService.removeTakenSeat(
-            reservedSeat.filmId,
-            reservedSeat.sessionId,
-            reservedSeat.seatKey,
-          );
-        }
-        throw new BadRequestException({ error: 'Seat already taken' });
-      }
-
-      reservedSeats.push({
-        filmId: ticket.film,
-        sessionId: ticket.session,
-        seatKey,
-      });
-    }
-
-    return {
-      total: resolvedTickets.length,
-      items: resolvedTickets,
-    };
+      throw error;
+    });
   }
 
-  private validateOrderBody(order: CreateOrderDto): void {
-    if (!order || !Array.isArray(order.tickets) || order.tickets.length === 0) {
-      throw new BadRequestException({ error: 'Tickets are required' });
+  private validateOrder(order: CreateOrderDto): void {
+    if (!Array.isArray(order.tickets) || order.tickets.length === 0) {
+      throw new BadRequestException('Order must contain at least one ticket');
     }
 
-    if (typeof order.email !== 'string' || typeof order.phone !== 'string') {
-      throw new BadRequestException({ error: 'Email and phone are required' });
-    }
+    order.tickets.forEach((ticket, index) => {
+      if (!this.isUuid(ticket.film)) {
+        throw new UnprocessableEntityException(
+          `Ticket at index ${index} contains an invalid film id`,
+        );
+      }
+
+      if (!this.isUuid(ticket.session)) {
+        throw new UnprocessableEntityException(
+          `Ticket at index ${index} contains an invalid session id`,
+        );
+      }
+
+      if (!Number.isInteger(ticket.row) || ticket.row <= 0) {
+        throw new BadRequestException(
+          `Ticket at index ${index} contains an invalid row`,
+        );
+      }
+
+      if (!Number.isInteger(ticket.seat) || ticket.seat <= 0) {
+        throw new BadRequestException(
+          `Ticket at index ${index} contains an invalid seat`,
+        );
+      }
+    });
+  }
+
+  private isUuid(value: string): boolean {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      value,
+    );
   }
 }

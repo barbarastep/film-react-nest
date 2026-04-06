@@ -18,6 +18,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
+    film: 'Недостижимая утопия',
     place: 'A1',
     session: '10:00',
     price: '1000 ₽',

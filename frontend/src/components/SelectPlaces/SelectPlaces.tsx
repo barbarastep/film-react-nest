@@ -27,22 +27,12 @@ const createArray = (length: number, shift: number = 0): number[] => {
 }
 
 export function SelectPlaces({ hall, taken, selected, onSelect }: SelectPlacesProps) {
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const target = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement;
-        const row = Number(target.dataset.row);
-        const seat = Number(target.dataset.seat);
-        if (row && seat) {
-            onSelect(getSeatKey(row, seat));
-        }
-    }
-
     const selectedSeats = new Set(
         selected.map((place) => getSeatKey(place.row, place.seat))
     );
 
     return (
-        <form className={styles.places} name="places" onSubmit={handleSubmit}>
+        <div className={styles.places}>
             <div className={styles.screen}>ЭКРАН</div>
             {createArray(hall.rows, 1).map(row => <div
                 key={row}
@@ -54,11 +44,11 @@ export function SelectPlaces({ hall, taken, selected, onSelect }: SelectPlacesPr
                         const seatKey = getSeatKey(row, seat);
                         return (<button
                             key={seatKey}
+                            type="button"
                             className={clsx(styles.seat, {
                                 [styles.seat_active]: selectedSeats.has(seatKey),
                             })}
-                            data-row={row}
-                            data-seat={seat}
+                            onClick={() => onSelect(seatKey)}
                             disabled={taken.includes(seatKey)}
                         >
                             {seat}
@@ -66,6 +56,6 @@ export function SelectPlaces({ hall, taken, selected, onSelect }: SelectPlacesPr
                     })}
                 </div>
             </div>)}
-        </form>
+        </div>
     );
 }

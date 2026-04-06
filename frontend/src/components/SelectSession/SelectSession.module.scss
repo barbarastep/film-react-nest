@@ -4,43 +4,33 @@
 .schedule {
   @include mixins.flex(column);
   gap: $defaultPadding;
+}
 
-  .places {
-    flex-direction: column;
-    gap: 2rem;
-  }
+.days {
+  @include mixins.flex(row);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
 
-  .screen {
-    background-color: $background;
-    color: white;
+.times {
+  @include mixins.grid(8rem, 1rem);
+}
+
+.dayButton,
+.time {
+  border: none;
+  background-color: $primaryLight;
+  color: white;
+  border-radius: 0.8rem;
+  padding: 0.75rem 1rem;
+  text-align: center;
+  @include mixins.selectable($secondary, 2px, $hover);
+
+  &::after {
     border-radius: 0.8rem;
-    padding: 0.5rem 1rem;
-    text-align: center;
   }
+}
 
-  .label {
-    padding: 0.5rem 0;
-  }
-
-  .days,
-  .times {
-    @include mixins.flex(row);
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
-
-  .dayButton,
-  .time,
-  .place {
-    border: none;
-    background-color: $primaryLight;
-    color: white;
-    border-radius: 0.8rem;
-    padding: 0.5rem 1rem;
-    @include mixins.selectable($secondary, 2px, $hover);
-
-    &::after {
-      border-radius: 0.8rem;
-    }
-  }
+.dayButton {
+  min-width: 8rem;
 }

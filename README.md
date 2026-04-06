@@ -2,11 +2,21 @@
 
 ## Установка
 
-### MongoDB
+### PostgreSQL
 
-Установите MongoDB скачав дистрибутив с официального сайта или с помощью пакетного менеджера вашей ОС. Также можно воспользоваться Docker (см. ветку `feat/docker`.
+Установите PostgreSQL и запустите сервер базы данных. Затем создайте
+пользователя и базу для проекта, например:
 
-Выполните скрипт `test/mongodb_initial_stub.js` в консоли `mongo`.
+```sql
+CREATE ROLE prac WITH LOGIN PASSWORD 'prac';
+CREATE DATABASE prac OWNER prac;
+```
+
+В каталоге `backend/test` лежат SQL-файлы для подготовки тестовых данных:
+
+- `prac.init.sql` - создаёт таблицы
+- `prac.films.sql` - заполняет таблицу фильмами
+- `prac.shedules.sql` - заполняет таблицу расписанием сеансов
 
 ### Бэкенд
 
@@ -20,17 +30,18 @@
 
 Создайте `.env` файл из примера `.env.example`, в нём укажите:
 
-* `DATABASE_DRIVER` - тип драйвера СУБД - в нашем случае это `mongodb` 
-* `DATABASE_URL` - адрес СУБД MongoDB, например `mongodb://127.0.0.1:27017/practicum`.  
+* `DATABASE_DRIVER` - тип драйвера СУБД, в нашем случае это `postgres`
+* `DATABASE_URL` - адрес PostgreSQL, например `postgres://localhost:5432/prac`
+* `DATABASE_USERNAME` - логин пользователя базы данных
+* `DATABASE_PASSWORD` - пароль пользователя базы данных
 
-MongoDB должна быть установлена и запущена.
+PostgreSQL должен быть установлен и запущен.
 
 Запустите бэкенд:
 
 `npm start:debug`
 
 Для проверки отправьте тестовый запрос с помощью Postman или `curl`.
-
 
 
 

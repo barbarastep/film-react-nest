@@ -13,6 +13,7 @@ export function Basket({ items, onDelete }: BasketProps) {
         <div className={styles.basket}>
             {items.map((item) => <Ticket
                 key={item.id}
+                film={item.film}
                 place={item.place}
                 session={item.session}
                 price={item.price}
