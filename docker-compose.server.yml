@@ -17,8 +17,6 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    ports:
-      - '8080:80'
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
@@ -36,8 +34,6 @@ services:
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
       LOGGER_TYPE: ${LOGGER_TYPE}
       PORT: ${PORT}
-    ports:
-      - '3000:3000'
     depends_on:
       - database
     networks:
