@@ -1,5 +1,10 @@
 # FILM!
 
+## Деплой
+
+- Приложение: http://filmproject.nomorepartiessite.ru
+- API: http://filmproject.nomorepartiessite.ru/api/afisha/films
+
 ## Установка
 
 ### PostgreSQL
@@ -42,6 +47,5 @@ PostgreSQL должен быть установлен и запущен.
 `npm start:debug`
 
 Для проверки отправьте тестовый запрос с помощью Postman или `curl`.
-
 
 
