@@ -5,6 +5,11 @@
 - Приложение: http://filmproject.nomorepartiessite.ru
 - API: http://filmproject.nomorepartiessite.ru/api/afisha/films
 
+Для запуска контейнеров создайте корневой `.env` на основе `.env.example`.
+
+- `docker-compose.yml` — локальная сборка и запуск проекта
+- `docker-compose.server.yml` — запуск готовых образов из GHCR на сервере
+
 ## Установка
 
 ### PostgreSQL
@@ -47,5 +52,3 @@ PostgreSQL должен быть установлен и запущен.
 `npm start:debug`
 
 Для проверки отправьте тестовый запрос с помощью Postman или `curl`.
-
-

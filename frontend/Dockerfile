@@ -1,11 +1,20 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine AS deps
 
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci
 
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-# The dist folder will be copied from this image into nginx via volume.
+FROM alpine:3.20 AS runner
+
+WORKDIR /app
+
+COPY --from=builder /app/dist ./dist

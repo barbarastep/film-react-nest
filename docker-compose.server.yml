@@ -27,11 +27,7 @@ services:
       - app-network
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-      target: runner
-    image: ghcr.io/barbarastep/film-backend:latest
+    image: ghcr.io/barbarastep/film-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
       DATABASE_DRIVER: ${DATABASE_DRIVER}
@@ -48,11 +44,7 @@ services:
       - app-network
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      target: runner
-    image: ghcr.io/barbarastep/film-frontend:latest
+    image: ghcr.io/barbarastep/film-frontend:${IMAGE_TAG:-latest}
     restart: unless-stopped
     volumes:
       - frontend_dist:/dist
@@ -63,10 +55,7 @@ services:
     command: ["sh", "-c", "cp -r /app/dist/. /dist && tail -f /dev/null"]
 
   nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    image: ghcr.io/barbarastep/film-nginx:latest
+    image: ghcr.io/barbarastep/film-nginx:${IMAGE_TAG:-latest}
     restart: unless-stopped
     ports:
       - '80:80'
